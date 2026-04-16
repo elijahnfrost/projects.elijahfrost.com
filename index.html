@@ -3,24 +3,75 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
     <title>Projects — elijahfrost.com</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <main class="wrap">
-      <header class="toolbar">
-        <button type="button" id="refresh" class="btn">Refresh</button>
-      </header>
-      <div id="status" class="status" aria-live="polite"></div>
-      <ul id="root" class="tree"></ul>
-      <p id="updated" class="meta"></p>
+    <main class="site-main fade-in-up">
+      <div class="shell">
+        <div class="shell-inner">
+          <section class="hero fade-in-up delay-1" aria-labelledby="page-title">
+            <h1 id="page-title" class="page-title">Projects</h1>
+            <div class="hero-actions">
+              <div class="hero-action-slot">
+                <button type="button" id="refresh" class="btn-hero" aria-busy="false">
+                  <span class="btn-hero-inner">
+                    <span class="btn-hero-icon-wrap" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="btn-hero-svg btn-hero-svg-primary"
+                      >
+                        <path d="M3 10a7 7 0 0 1 12.74-3.5" />
+                        <path d="M17 3v4h-4" />
+                        <path d="M17 10a7 7 0 0 1-12.74 3.5" />
+                        <path d="M3 17v-4h4" />
+                      </svg>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        class="btn-hero-svg btn-hero-svg-busy"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 3.5a6.5 6.5 0 1 1-4.6 1.9" />
+                      </svg>
+                    </span>
+                    <span class="btn-hero-label">Refresh</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div id="status" class="status fade-in-up delay-2" aria-live="polite"></div>
+
+          <div class="tree-shell fade-in-up delay-3">
+            <ul id="root" class="tree"></ul>
+          </div>
+
+          <footer class="meta fade-in-up delay-4">
+            <p class="meta-label">Last updated</p>
+            <p id="updated" class="meta-time" aria-live="polite"></p>
+          </footer>
+        </div>
+      </div>
     </main>
     <script src="/script.js" defer></script>
+    <script src="/cursor.js" defer></script>
   </body>
 </html>

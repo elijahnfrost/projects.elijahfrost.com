@@ -6,6 +6,12 @@ const statusEl = document.getElementById("status");
 const updatedEl = document.getElementById("updated");
 const refreshBtn = document.getElementById("refresh");
 
+function setRefreshLoading(loading) {
+  if (!refreshBtn) return;
+  refreshBtn.disabled = loading;
+  refreshBtn.setAttribute("aria-busy", loading ? "true" : "false");
+}
+
 function readCache() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -90,17 +96,17 @@ function render(projects) {
 }
 
 function setUpdatedLine(iso) {
+  if (!updatedEl) return;
   const d = new Date(iso);
-  updatedEl.textContent = `Last updated: ${d.toLocaleString()}`;
+  updatedEl.textContent = d.toLocaleString();
 }
 
 async function fetchProjects(bypassCache) {
-  statusEl.textContent = "Loading…";
   if (!bypassCache) {
     const cached = readCache();
     if (cached) {
       render(cached.data);
-      statusEl.textContent = "";
+      if (statusEl) statusEl.textContent = "";
       setUpdatedLine(new Date(cached.ts).toISOString());
       return;
     }
@@ -108,27 +114,35 @@ async function fetchProjects(bypassCache) {
     clearCache();
   }
 
-  const res = await fetch("/api/projects", {
-    cache: "no-store",
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    statusEl.textContent = `Error ${res.status}${errText ? `: ${errText}` : ""}`;
-    return;
+  setRefreshLoading(true);
+  if (statusEl) statusEl.textContent = "Loading…";
+
+  try {
+    const res = await fetch("/api/projects", {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      if (statusEl)
+        statusEl.textContent = `Error ${res.status}${errText ? `: ${errText}` : ""}`;
+      return;
+    }
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      if (statusEl) statusEl.textContent = "Unexpected response.";
+      return;
+    }
+    writeCache(data);
+    render(data);
+    if (statusEl) statusEl.textContent = "";
+    setUpdatedLine(new Date().toISOString());
+  } finally {
+    setRefreshLoading(false);
   }
-  const data = await res.json();
-  if (!Array.isArray(data)) {
-    statusEl.textContent = "Unexpected response.";
-    return;
-  }
-  writeCache(data);
-  render(data);
-  statusEl.textContent = "";
-  setUpdatedLine(new Date().toISOString());
 }
 
-refreshBtn.addEventListener("click", () => {
+refreshBtn?.addEventListener("click", () => {
   fetchProjects(true);
 });
 
