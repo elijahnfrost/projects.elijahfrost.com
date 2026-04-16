@@ -326,6 +326,8 @@ html[data-cursor-custom] body * {
   align-items: center;
   justify-content: center;
   transform: translateY(1px);
+  color: var(--stone-300);
+  transition: color 120ms ease;
 }
 
 .btn-hero-svg {
@@ -336,6 +338,11 @@ html[data-cursor-custom] body * {
   height: 1rem;
   display: block;
   transition: all 150ms ease-out;
+}
+
+.btn-hero:hover:not(:disabled) .btn-hero-icon-wrap,
+.btn-hero:focus-visible:not(:disabled) .btn-hero-icon-wrap {
+  color: var(--color-fg);
 }
 
 .btn-hero-svg-primary {
@@ -514,9 +521,9 @@ html[data-cursor-custom] body * {
   font-size: 1.25rem;
   line-height: 1.25;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--stone-200);
   text-decoration: none;
-  transition: color 120ms ease;
+  transition: color 140ms ease;
 }
 
 @media (min-width: 640px) {
@@ -542,8 +549,8 @@ html[data-cursor-custom] body * {
   margin-left: 0.5rem;
   font-weight: 400;
   font-size: 0.875rem;
-  color: var(--stone-400);
-  transition: color 120ms ease;
+  color: var(--stone-500);
+  transition: color 140ms ease;
 }
 
 /* TopNav link — text-xs tracking-[0.12em] uppercase */
