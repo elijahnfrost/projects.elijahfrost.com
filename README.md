@@ -55,4 +55,4 @@ gh repo create project-directory --public --source=. --remote=origin --push
 - `index.html`, `style.css`, `script.js` — static frontend (source of truth at repo root).
 - `functions/api/projects.js` — source for the serverless handler.
 - `public/` — filled by `npm run vercel-build` (copies the three static files); that folder is ignored by git. Vercel’s **Output Directory** is `public`.
-- `api/projects.js` — generated on build; ignored by git.
+- `api/projects.js` — synced from `functions/api/projects.js` on each build; tracked in git so Vercel always sees `api/` in the repo.
