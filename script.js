@@ -71,7 +71,7 @@ function render(projects) {
     a.rel = "noopener noreferrer";
     const titlePart = document.createElement("span");
     titlePart.className = "project-heading";
-    titlePart.textContent = `${projectHeading(p)} `;
+    titlePart.textContent = projectHeading(p);
     const dim = document.createElement("span");
     dim.className = "project-url";
     dim.textContent = p.url;
