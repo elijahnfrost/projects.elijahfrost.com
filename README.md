@@ -35,6 +35,15 @@ Publish a `sitemap.xml` at the root of the subdomain (`https://<sub>.elijahfrost
 
 Use **Refresh** to clear the browser cache and request `/api/projects` again. Without **Refresh**, responses are cached in `localStorage` for one hour.
 
+## GitHub
+
+The repo is initialized locally on `main`. To publish it under **`project-directory`** on your GitHub account (after [installing `gh`](https://cli.github.com/) and signing in):
+
+```bash
+gh auth login
+gh repo create project-directory --public --source=. --remote=origin --push
+```
+
 ## Local development
 
 1. Copy `.env.example` to `.env` and fill in `CF_ZONE_ID` and `CF_API_TOKEN`.
