@@ -5,11 +5,16 @@
 
 const CF_API = "https://api.cloudflare.com/client/v4";
 
-/** Exact hostnames to omit from the directory */
-const EXCLUDED_HOSTS = new Set([
-  "www.elijahfrost.com",
-  "projects.elijahfrost.com",
-]);
+/** Exact hostnames to omit from the directory (www is a duplicate of apex). */
+const EXCLUDED_HOSTS = new Set(["www.elijahfrost.com"]);
+
+/** Always listed first: primary site, then this directory — not only “subdomain” DNS names. */
+const PRIORITY_HOSTS = ["elijahfrost.com", "projects.elijahfrost.com"];
+
+const DISPLAY_LABEL = {
+  elijahfrost: "Elijah Frost",
+  projects: "Directory",
+};
 const STATIC_EXT =
   /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|map|json)$/i;
 
@@ -134,11 +139,34 @@ function extractHostnamesFromRecords(records) {
   return [...hosts];
 }
 
+/** DNS-derived hostnames + priority hosts (apex + this site), deduped, fixed order. */
+function mergeHostnames(dnsHostnames) {
+  const seen = new Set();
+  const out = [];
+  for (const h of PRIORITY_HOSTS) {
+    if (seen.has(h)) continue;
+    seen.add(h);
+    out.push(h);
+  }
+  for (const h of dnsHostnames) {
+    if (seen.has(h) || EXCLUDED_HOSTS.has(h)) continue;
+    seen.add(h);
+    out.push(h);
+  }
+  return out;
+}
+
 function hostToProjectName(hostname) {
+  const h = (hostname || "").toLowerCase();
   const zoneSuffix = ".elijahfrost.com";
-  return hostname.toLowerCase().endsWith(zoneSuffix)
-    ? hostname.slice(0, -zoneSuffix.length)
-    : hostname;
+  if (h === "elijahfrost.com") return "elijahfrost";
+  if (h.endsWith(zoneSuffix)) return h.slice(0, -zoneSuffix.length);
+  return h;
+}
+
+function priorityIndex(hostname) {
+  const i = PRIORITY_HOSTS.indexOf(hostname);
+  return i === -1 ? 1000 : i;
 }
 
 async function headOk(url, timeoutMs) {
@@ -259,27 +287,38 @@ export default async function handler(req, res) {
 
   try {
     const records = await fetchAllDnsRecords(zoneId, auth.headers);
-    const hostnames = extractHostnamesFromRecords(records);
+    const fromDns = extractHostnamesFromRecords(records);
+    const hostnames = mergeHostnames(fromDns);
 
     const headResults = await mapWithConcurrency(hostnames, 30, async (host) => {
       const origin = `https://${host}`;
       const ok = await headOk(origin, 3000);
-      return { host, origin, ok };
+      const pinned = PRIORITY_HOSTS.includes(host);
+      return { host, origin, ok, pinned };
     });
 
-    const passed = headResults.filter((x) => x.ok);
+    const passed = headResults.filter((x) => x.ok || x.pinned);
 
     const projects = await mapWithConcurrency(passed, 10, async ({ host, origin }) => {
       const name = hostToProjectName(host);
       const routes = await fetchSitemapRoutes(origin, 12000);
+      const label = DISPLAY_LABEL[name];
       return {
         name,
         url: origin,
         routes,
+        ...(label ? { label } : {}),
       };
     });
 
-    projects.sort((a, b) => a.name.localeCompare(b.name));
+    projects.sort((a, b) => {
+      const ha = new URL(a.url).hostname;
+      const hb = new URL(b.url).hostname;
+      const pa = priorityIndex(ha);
+      const pb = priorityIndex(hb);
+      if (pa !== pb) return pa - pb;
+      return a.name.localeCompare(b.name);
+    });
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", "application/json; charset=utf-8");

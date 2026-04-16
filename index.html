@@ -18,50 +18,52 @@
     <main class="site-main fade-in-up">
       <div class="shell">
         <div class="shell-inner">
-          <section class="hero fade-in-up delay-1" aria-labelledby="page-title">
-            <h1 id="page-title" class="page-title">Projects</h1>
-            <div class="hero-actions">
-              <div class="hero-action-slot">
-                <button type="button" id="refresh" class="btn-hero" aria-busy="false">
-                  <span class="btn-hero-inner">
-                    <span class="btn-hero-icon-wrap" aria-hidden="true">
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="btn-hero-svg btn-hero-svg-primary"
-                      >
-                        <path d="M3 10a7 7 0 0 1 12.74-3.5" />
-                        <path d="M17 3v4h-4" />
-                        <path d="M17 10a7 7 0 0 1-12.74 3.5" />
-                        <path d="M3 17v-4h4" />
-                      </svg>
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        class="btn-hero-svg btn-hero-svg-busy"
-                        aria-hidden="true"
-                      >
-                        <path d="M10 3.5a6.5 6.5 0 1 1-4.6 1.9" />
-                      </svg>
+          <div class="site-stack fade-in-up delay-1">
+            <section class="hero" aria-labelledby="page-title">
+              <h1 id="page-title" class="page-title">Projects</h1>
+              <div class="hero-actions">
+                <div class="hero-action-slot">
+                  <button type="button" id="refresh" class="btn-hero" aria-busy="false">
+                    <span class="btn-hero-inner">
+                      <span class="btn-hero-icon-wrap" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="btn-hero-svg btn-hero-svg-primary"
+                        >
+                          <path d="M3 10a7 7 0 0 1 12.74-3.5" />
+                          <path d="M17 3v4h-4" />
+                          <path d="M17 10a7 7 0 0 1-12.74 3.5" />
+                          <path d="M3 17v-4h4" />
+                        </svg>
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          class="btn-hero-svg btn-hero-svg-busy"
+                          aria-hidden="true"
+                        >
+                          <path d="M10 3.5a6.5 6.5 0 1 1-4.6 1.9" />
+                        </svg>
+                      </span>
+                      <span class="btn-hero-label">Refresh</span>
                     </span>
-                    <span class="btn-hero-label">Refresh</span>
-                  </span>
-                </button>
+                  </button>
+                </div>
               </div>
+            </section>
+
+            <div id="status" class="status fade-in-up delay-2" aria-live="polite"></div>
+
+            <div class="tree-shell fade-in-up delay-3">
+              <ul id="root" class="tree"></ul>
             </div>
-          </section>
-
-          <div id="status" class="status fade-in-up delay-2" aria-live="polite"></div>
-
-          <div class="tree-shell fade-in-up delay-3">
-            <ul id="root" class="tree"></ul>
           </div>
 
           <footer class="meta fade-in-up delay-4">

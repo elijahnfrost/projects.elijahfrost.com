@@ -53,6 +53,11 @@ function toTitle(name) {
     .join(" ");
 }
 
+function projectHeading(p) {
+  if (typeof p.label === "string" && p.label.trim()) return p.label.trim();
+  return toTitle(p.name);
+}
+
 function render(projects) {
   rootEl.innerHTML = "";
   const frag = document.createDocumentFragment();
@@ -65,7 +70,8 @@ function render(projects) {
     a.href = p.url;
     a.rel = "noopener noreferrer";
     const titlePart = document.createElement("span");
-    titlePart.textContent = `${toTitle(p.name)} `;
+    titlePart.className = "project-heading";
+    titlePart.textContent = `${projectHeading(p)} `;
     const dim = document.createElement("span");
     dim.className = "project-url";
     dim.textContent = p.url;
@@ -76,7 +82,16 @@ function render(projects) {
 
     const routes = Array.isArray(p.routes) ? p.routes : [];
     if (routes.length) {
+      const det = document.createElement("details");
+      det.className = "project-routes";
+
+      const sum = document.createElement("summary");
+      sum.className = "routes-summary";
+      const n = routes.length;
+      sum.textContent = `${n} path${n === 1 ? "" : "s"} from sitemap`;
+
       const sub = document.createElement("ul");
+      sub.className = "route-list";
       for (const route of routes) {
         const rli = document.createElement("li");
         const ra = document.createElement("a");
@@ -88,7 +103,9 @@ function render(projects) {
         rli.appendChild(ra);
         sub.appendChild(rli);
       }
-      li.appendChild(sub);
+      det.appendChild(sum);
+      det.appendChild(sub);
+      li.appendChild(det);
     }
     frag.appendChild(li);
   }
