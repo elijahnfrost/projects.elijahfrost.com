@@ -1,0 +1,135 @@
+const CACHE_KEY = "project-directory-cache-v1";
+const TTL_MS = 60 * 60 * 1000;
+
+const rootEl = document.getElementById("root");
+const statusEl = document.getElementById("status");
+const updatedEl = document.getElementById("updated");
+const refreshBtn = document.getElementById("refresh");
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof parsed.ts !== "number" ||
+      parsed.data === undefined
+    ) {
+      return null;
+    }
+    if (Date.now() - parsed.ts > TTL_MS) return null;
+    return { data: parsed.data, ts: parsed.ts };
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(data) {
+  localStorage.setItem(
+    CACHE_KEY,
+    JSON.stringify({ ts: Date.now(), data })
+  );
+}
+
+function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+}
+
+function toTitle(name) {
+  return name
+    .split(/[-_.]+/)
+    .filter(Boolean)
+    .map(
+      (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
+
+function render(projects) {
+  rootEl.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  for (const p of projects) {
+    const li = document.createElement("li");
+    const line = document.createElement("span");
+    line.className = "project-line";
+    const a = document.createElement("a");
+    a.className = "project-title";
+    a.href = p.url;
+    a.rel = "noopener noreferrer";
+    const titlePart = document.createElement("span");
+    titlePart.textContent = `${toTitle(p.name)} `;
+    const dim = document.createElement("span");
+    dim.className = "project-url";
+    dim.textContent = p.url;
+    a.appendChild(titlePart);
+    a.appendChild(dim);
+    line.appendChild(a);
+    li.appendChild(line);
+
+    const routes = Array.isArray(p.routes) ? p.routes : [];
+    if (routes.length) {
+      const sub = document.createElement("ul");
+      for (const route of routes) {
+        const rli = document.createElement("li");
+        const ra = document.createElement("a");
+        ra.className = "route-link";
+        const full = `${p.url.replace(/\/$/, "")}${route}`;
+        ra.href = full;
+        ra.rel = "noopener noreferrer";
+        ra.textContent = route;
+        rli.appendChild(ra);
+        sub.appendChild(rli);
+      }
+      li.appendChild(sub);
+    }
+    frag.appendChild(li);
+  }
+  rootEl.appendChild(frag);
+}
+
+function setUpdatedLine(iso) {
+  const d = new Date(iso);
+  updatedEl.textContent = `Last updated: ${d.toLocaleString()}`;
+}
+
+async function fetchProjects(bypassCache) {
+  statusEl.textContent = "Loading…";
+  if (!bypassCache) {
+    const cached = readCache();
+    if (cached) {
+      render(cached.data);
+      statusEl.textContent = "";
+      setUpdatedLine(new Date(cached.ts).toISOString());
+      return;
+    }
+  } else {
+    clearCache();
+  }
+
+  const res = await fetch("/api/projects", {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    statusEl.textContent = `Error ${res.status}${errText ? `: ${errText}` : ""}`;
+    return;
+  }
+  const data = await res.json();
+  if (!Array.isArray(data)) {
+    statusEl.textContent = "Unexpected response.";
+    return;
+  }
+  writeCache(data);
+  render(data);
+  statusEl.textContent = "";
+  setUpdatedLine(new Date().toISOString());
+}
+
+refreshBtn.addEventListener("click", () => {
+  fetchProjects(true);
+});
+
+fetchProjects(false);

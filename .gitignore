@@ -1,0 +1,5 @@
+.env
+.env*.local
+.vercel
+api/projects.js
+.DS_Store

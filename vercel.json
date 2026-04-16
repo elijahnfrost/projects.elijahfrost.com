@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "functions": {
+    "api/projects.js": {
+      "maxDuration": 60
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "project-directory",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "mkdir -p api && cp functions/api/projects.js api/projects.js"
+  }
+}
