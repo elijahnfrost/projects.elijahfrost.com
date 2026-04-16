@@ -1,6 +1,6 @@
 # Project directory
 
-This site lists every live subdomain on `elijahfrost.com` that appears in your Cloudflare DNS (A or CNAME), except the apex, `www`, and `projects`. Each project is probed with `HEAD`, sitemap paths are read from `https://<subdomain>.elijahfrost.com/sitemap.xml` when present, and the UI shows a simple nested outline. Deploy a new project to a new subdomain and the directory updates on the next fetch—no manual list to maintain.
+This site lists every live subdomain on `elijahfrost.com` that appears in your Cloudflare DNS (A or CNAME), excludes `www`, and always includes the apex (`elijahfrost.com`) plus this directory (`projects.elijahfrost.com`) as pinned entries. Each project is probed with `HEAD`, sitemap paths are read from `https://<subdomain>.elijahfrost.com/sitemap.xml` when present, and the UI shows a simple nested outline. Deploy a new project to a new subdomain and the directory updates on the next fetch—no manual list to maintain.
 
 ## Environment variables
 

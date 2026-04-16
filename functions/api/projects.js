@@ -164,6 +164,28 @@ function hostToProjectName(hostname) {
   return h;
 }
 
+/** Normalize aliases like `career-tracker` and `careertracker` to one key. */
+function canonicalProjectKey(name) {
+  return (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function preferHostname(currentHost, candidateHost) {
+  if (!currentHost) return candidateHost;
+  const curPriority = priorityIndex(currentHost);
+  const nextPriority = priorityIndex(candidateHost);
+  if (curPriority !== nextPriority) {
+    return nextPriority < curPriority ? candidateHost : currentHost;
+  }
+  const curName = hostToProjectName(currentHost);
+  const nextName = hostToProjectName(candidateHost);
+  const curHasSeparator = /[-_.]/.test(curName);
+  const nextHasSeparator = /[-_.]/.test(nextName);
+  if (curHasSeparator !== nextHasSeparator) {
+    return nextHasSeparator ? candidateHost : currentHost;
+  }
+  return candidateHost.localeCompare(currentHost) < 0 ? candidateHost : currentHost;
+}
+
 function priorityIndex(hostname) {
   const i = PRIORITY_HOSTS.indexOf(hostname);
   return i === -1 ? 1000 : i;
@@ -298,8 +320,24 @@ export default async function handler(req, res) {
     });
 
     const passed = headResults.filter((x) => x.ok || x.pinned);
+    const dedupedByProject = new Map();
+    for (const entry of passed) {
+      const name = hostToProjectName(entry.host);
+      const key = canonicalProjectKey(name);
+      const existing = dedupedByProject.get(key);
+      if (!existing) {
+        dedupedByProject.set(key, entry);
+        continue;
+      }
+      const preferredHost = preferHostname(existing.host, entry.host);
+      if (preferredHost === entry.host) {
+        dedupedByProject.set(key, entry);
+      }
+    }
+    const uniqueHosts = [...dedupedByProject.values()];
 
-    const projects = await mapWithConcurrency(passed, 10, async ({ host, origin }) => {
+    const projects = await mapWithConcurrency(uniqueHosts, 10, async ({ host }) => {
+      const origin = `https://${host}`;
       const name = hostToProjectName(host);
       const routes = await fetchSitemapRoutes(origin, 12000);
       const label = DISPLAY_LABEL[name];
