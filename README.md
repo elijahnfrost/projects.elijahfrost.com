@@ -4,14 +4,14 @@ This site lists every live subdomain on `elijahfrost.com` that appears in your C
 
 ## Environment variables
 
-| Variable       | Purpose |
-|----------------|---------|
-| `CF_ZONE_ID`   | Cloudflare zone ID for `elijahfrost.com`. |
-| `CF_API_TOKEN` | Cloudflare API token with **Zone:DNS:Read** (to list records). Use **Zone:DNS:Edit** as well if you automate the `projects` CNAME from scripts or CI. **Zone:Read** helps resolve the zone ID via the API. |
+| Variable | Purpose |
+|----------|---------|
+| `CF_ZONE_ID` | Zone ID for `elijahfrost.com` (**Overview** in Cloudflare). |
+| `CF_API_TOKEN` | **API token** (recommended): **Zone → Zone → Read**, **Zone → DNS → Read** (and **DNS → Edit** if you use the DNS script). Scoped to `elijahfrost.com`. Do **not** put the **Global API Key** here — it only works with Bearer API tokens. |
+| `CF_AUTH_EMAIL` | (Optional alternative to `CF_API_TOKEN`) Your Cloudflare account email. |
+| `CF_GLOBAL_API_KEY` | (Optional) Global API Key from **My Profile → API Keys**. Use **with** `CF_AUTH_EMAIL`; leave `CF_API_TOKEN` unset when using this pair. |
 
-Set these in the Vercel project (**Settings → Environment Variables**) for Production (and Preview if you want the API to work on preview deployments).
-
-If `CF_API_TOKEN` is rejected by Cloudflare (`9109 Invalid access token`), create a new **Account API Token** at [Cloudflare API tokens](https://dash.cloudflare.com/profile/api-tokens) with at least **Zone → Zone → Read**, **Zone → DNS → Read**, and **Zone → DNS → Edit** (edit is only needed for the DNS script below). Paste the token into Vercel and redeploy. You can read **Zone ID** on the domain’s **Overview** page (right-hand column).
+Set these in Vercel (**Settings → Environment Variables**) for Production. If auth still fails, create a new [API token](https://dash.cloudflare.com/profile/api-tokens) and redeploy.
 
 ### DNS for `projects.elijahfrost.com` (Vercel)
 

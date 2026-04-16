@@ -31,24 +31,83 @@ export const config = {
   maxDuration: 60,
 };
 
-function cfHeaders(token) {
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+/**
+ * Prefer API token (Bearer). Alternative: Global API Key via CF_AUTH_EMAIL + CF_GLOBAL_API_KEY
+ * (Bearer must NOT be used with the Global Key — that causes "Authentication error").
+ */
+function buildCfRequestHeaders() {
+  const token = (process.env.CF_API_TOKEN || "").trim();
+  const email = (process.env.CF_AUTH_EMAIL || "").trim();
+  const globalKey = (process.env.CF_GLOBAL_API_KEY || "").trim();
+
+  if (token) {
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    };
+  }
+  if (email && globalKey) {
+    return {
+      headers: {
+        "X-Auth-Email": email,
+        "X-Auth-Key": globalKey,
+        "Content-Type": "application/json",
+      },
+    };
+  }
+  return null;
 }
 
-async function fetchAllDnsRecords(zoneId, token) {
+async function parseJsonResponse(res) {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { _parseError: true, text: text.slice(0, 200) };
+  }
+}
+
+function formatCfDnsError(res, body) {
+  const msgs =
+    body && !body._parseError && Array.isArray(body.errors)
+      ? body.errors.map((e) => `${e.code ?? "?"}: ${e.message}`)
+      : [];
+  const detail = msgs.length ? msgs.join("; ") : `HTTP ${res.status}`;
+  let hint = "";
+  if (
+    res.status === 401 ||
+    res.status === 403 ||
+    /authentication/i.test(detail) ||
+    /\b9109\b/.test(detail)
+  ) {
+    hint =
+      " Ensure CF_API_TOKEN is an API token (Create Custom Token), not the Global API Key in a Bearer header. Or omit CF_API_TOKEN and set CF_AUTH_EMAIL + CF_GLOBAL_API_KEY.";
+  }
+  if (/6003|invalid.*token|9109/i.test(detail) && !hint) {
+    hint =
+      " Invalid or revoked credentials — create a new token with Zone → Zone → Read and Zone → DNS → Read on elijahfrost.com.";
+  }
+  return `Cloudflare DNS list failed: ${detail}.${hint}`;
+}
+
+async function fetchAllDnsRecords(zoneId, requestHeaders) {
   const all = [];
   let page = 1;
   const perPage = 500;
   for (;;) {
     const url = `${CF_API}/zones/${zoneId}/dns_records?per_page=${perPage}&page=${page}`;
-    const res = await fetch(url, { headers: cfHeaders(token) });
-    const body = await res.json();
+    const res = await fetch(url, { headers: requestHeaders });
+    const body = await parseJsonResponse(res);
+    if (!body || body._parseError) {
+      throw new Error(
+        `Cloudflare DNS list failed: bad response (${res.status}).${body?.text ? ` Body: ${body.text}` : ""}`
+      );
+    }
     if (!body.success) {
-      const msg = body.errors?.map((e) => e.message).join("; ") || "Unknown error";
-      throw new Error(`Cloudflare DNS list failed: ${msg}`);
+      throw new Error(formatCfDnsError(res, body));
     }
     const batch = body.result || [];
     all.push(...batch);
@@ -184,16 +243,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const zoneId = process.env.CF_ZONE_ID;
-  const token = process.env.CF_API_TOKEN;
-  if (!zoneId || !token) {
+  const zoneId = (process.env.CF_ZONE_ID || "").trim();
+  const auth = buildCfRequestHeaders();
+  if (!zoneId) {
     return res.status(500).json({
-      error: "Missing CF_ZONE_ID or CF_API_TOKEN",
+      error: "Missing CF_ZONE_ID (Cloudflare zone Overview for elijahfrost.com).",
+    });
+  }
+  if (!auth) {
+    return res.status(500).json({
+      error:
+        "Missing Cloudflare credentials. Set CF_API_TOKEN (API token), or CF_AUTH_EMAIL + CF_GLOBAL_API_KEY (Global API Key — do not put the Global Key in CF_API_TOKEN).",
     });
   }
 
   try {
-    const records = await fetchAllDnsRecords(zoneId, token);
+    const records = await fetchAllDnsRecords(zoneId, auth.headers);
     const hostnames = extractHostnamesFromRecords(records);
 
     const headResults = await mapWithConcurrency(hostnames, 30, async (host) => {

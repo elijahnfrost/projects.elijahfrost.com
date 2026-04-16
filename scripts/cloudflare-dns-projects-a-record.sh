@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Creates or updates the Vercel-recommended A record for projects.elijahfrost.com.
-# Requires: CF_API_TOKEN and CF_ZONE_ID (export or load from ../.env)
+# Requires: CF_ZONE_ID and either CF_API_TOKEN or CF_AUTH_EMAIL+CF_GLOBAL_API_KEY
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 if [[ -f "$ROOT/.env" ]]; then
@@ -9,10 +9,16 @@ if [[ -f "$ROOT/.env" ]]; then
   source "$ROOT/.env"
   set +a
 fi
-: "${CF_API_TOKEN:?Set CF_API_TOKEN}"
 : "${CF_ZONE_ID:?Set CF_ZONE_ID}"
 BASE="https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/dns_records"
-H=(-H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json")
+if [[ -n "${CF_AUTH_EMAIL:-}" && -n "${CF_GLOBAL_API_KEY:-}" ]]; then
+  H=(-H "X-Auth-Email: ${CF_AUTH_EMAIL}" -H "X-Auth-Key: ${CF_GLOBAL_API_KEY}" -H "Content-Type: application/json")
+elif [[ -n "${CF_API_TOKEN:-}" ]]; then
+  H=(-H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json")
+else
+  echo "Set CF_API_TOKEN or CF_AUTH_EMAIL + CF_GLOBAL_API_KEY" >&2
+  exit 1
+fi
 RECORD_IP="76.76.21.21"
 
 EXISTING="$(curl -sS -G "${BASE}" --data-urlencode "type=A" --data-urlencode "name=projects.elijahfrost.com" "${H[@]}")"
