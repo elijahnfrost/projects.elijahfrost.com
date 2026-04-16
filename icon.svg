@@ -1,17 +1,9 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" fill="#0d0d0d"/>
-  <!-- Directory index: vertical rail + three list strokes (white line art on dark ground) -->
-  <path
-    d="M14 17v30"
-    stroke="#ffffff"
-    stroke-width="2"
-    stroke-linecap="round"
-  />
-  <path
-    d="M21 24h29M21 32h23M21 40h27"
-    stroke="#ffffff"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+  <!-- Projects mark: four bright tiles inside a subtle frame for clarity at favicon sizes -->
+  <rect x="12" y="12" width="40" height="40" rx="8" stroke="#E7E5E4" stroke-width="2.5"/>
+  <rect x="18" y="18" width="11" height="11" rx="2.5" fill="#FAF8F5"/>
+  <rect x="35" y="18" width="11" height="11" rx="2.5" fill="#D6D3D1"/>
+  <rect x="18" y="35" width="11" height="11" rx="2.5" fill="#D6D3D1"/>
+  <rect x="35" y="35" width="11" height="11" rx="2.5" fill="#FAF8F5"/>
 </svg>
