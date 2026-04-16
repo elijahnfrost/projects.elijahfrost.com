@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run vercel-build",
+  "outputDirectory": "public",
   "functions": {
     "api/projects.js": {
       "maxDuration": 60

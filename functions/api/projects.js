@@ -209,6 +209,8 @@ export default async function handler(req, res) {
       };
     });
 
+    projects.sort((a, b) => a.name.localeCompare(b.name));
+
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");

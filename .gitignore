@@ -2,4 +2,5 @@
 .env*.local
 .vercel
 api/projects.js
+public/
 .DS_Store

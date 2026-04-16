@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "vercel-build": "mkdir -p api && cp functions/api/projects.js api/projects.js"
+    "vercel-build": "mkdir -p api public && cp functions/api/projects.js api/projects.js && cp index.html style.css script.js public/"
   }
 }

@@ -11,6 +11,18 @@ This site lists every live subdomain on `elijahfrost.com` that appears in your C
 
 Set these in the Vercel project (**Settings → Environment Variables**) for Production (and Preview if you want the API to work on preview deployments).
 
+If `CF_API_TOKEN` is rejected by Cloudflare (`9109 Invalid access token`), create a new **Account API Token** at [Cloudflare API tokens](https://dash.cloudflare.com/profile/api-tokens) with at least **Zone → Zone → Read**, **Zone → DNS → Read**, and **Zone → DNS → Edit** (edit is only needed for the DNS script below). Paste the token into Vercel and redeploy. You can read **Zone ID** on the domain’s **Overview** page (right-hand column).
+
+### DNS for `projects.elijahfrost.com` (Vercel)
+
+Vercel expects an **A** record: `projects.elijahfrost.com` → `76.76.21.21` (shown in `vercel domains inspect` after the hostname is attached to the project). With a working `CF_API_TOKEN` and `CF_ZONE_ID` in `.env`, run:
+
+```bash
+./scripts/cloudflare-dns-projects-a-record.sh
+```
+
+Then wait for DNS to propagate and redeploy or trigger a new production deployment so TLS can finish issuing.
+
 ## Add a new project
 
 Point a new DNS name at your app (for example `my-app.elijahfrost.com`) as you already do for any deployment. After DNS is live and the site answers with a successful `HEAD` on `https://my-app.elijahfrost.com/`, it appears in this directory automatically.
@@ -31,6 +43,7 @@ Use **Refresh** to clear the browser cache and request `/api/projects` again. Wi
 
 ## Repository layout
 
-- `index.html`, `style.css`, `script.js` — static frontend.
+- `index.html`, `style.css`, `script.js` — static frontend (source of truth at repo root).
 - `functions/api/projects.js` — source for the serverless handler.
-- `api/projects.js` — generated on build (`npm run vercel-build`); ignored by git. Vercel runs the build command before deployment.
+- `public/` — filled by `npm run vercel-build` (copies the three static files); that folder is ignored by git. Vercel’s **Output Directory** is `public`.
+- `api/projects.js` — generated on build; ignored by git.
