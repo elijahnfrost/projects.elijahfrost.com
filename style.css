@@ -398,10 +398,16 @@ html[data-cursor-custom] body * {
 }
 
 /**
- * Project list only: “blocks falling into place” — each row drops from above,
- * settles with a slight overshoot (material-style), sequenced by --project-stagger.
- * Static chrome (hero, footer) stays unanimated for contrast.
+ * Project list only — one block at a time, in list order (API sort: priority, then name).
+ * Each row gets --project-stagger = 0,1,2,…; delay between starts ≈ chain gap so projects
+ * read as Elijah Frost → Directory → … instead of all moving together.
  */
+:root {
+  --project-drop-duration: 0.52s;
+  /* Start next block after the previous drop mostly finishes (sequential, not simultaneous). */
+  --project-chain-gap: 0.5s;
+}
+
 @keyframes projectBlockStack {
   0% {
     opacity: 0;
@@ -433,8 +439,8 @@ html[data-cursor-custom] body * {
 }
 
 .tree .project-inner-enter {
-  animation: projectBlockStack 0.72s linear both;
-  animation-delay: calc(var(--project-stagger, 0) * 78ms);
+  animation: projectBlockStack var(--project-drop-duration) linear both;
+  animation-delay: calc(var(--project-stagger, 0) * var(--project-chain-gap));
 }
 
 @media (prefers-reduced-motion: reduce) {

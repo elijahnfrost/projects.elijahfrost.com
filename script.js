@@ -72,6 +72,7 @@ function render(projects, options = {}) {
     const inner = document.createElement("div");
     inner.className = animate ? "project-inner project-inner-enter" : "project-inner";
     if (animate) {
+      /* Order matches API array (pinned hosts first, then alphabetical). */
       inner.style.setProperty("--project-stagger", String(index));
     }
     const line = document.createElement("span");
