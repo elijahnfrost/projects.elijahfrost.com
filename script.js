@@ -68,9 +68,11 @@ function render(projects, options = {}) {
   const frag = document.createDocumentFragment();
   projects.forEach((p, index) => {
     const li = document.createElement("li");
-    li.className = animate ? "project-row project-enter" : "project-row";
+    li.className = "project-row";
+    const inner = document.createElement("div");
+    inner.className = animate ? "project-inner project-inner-enter" : "project-inner";
     if (animate) {
-      li.style.setProperty("--project-stagger", String(index));
+      inner.style.setProperty("--project-stagger", String(index));
     }
     const line = document.createElement("span");
     line.className = "project-line";
@@ -87,7 +89,7 @@ function render(projects, options = {}) {
     a.appendChild(titlePart);
     a.appendChild(dim);
     line.appendChild(a);
-    li.appendChild(line);
+    inner.appendChild(line);
 
     const routes = Array.isArray(p.routes) ? p.routes : [];
     if (routes.length) {
@@ -114,8 +116,9 @@ function render(projects, options = {}) {
       }
       det.appendChild(sum);
       det.appendChild(sub);
-      li.appendChild(det);
+      inner.appendChild(det);
     }
+    li.appendChild(inner);
     frag.appendChild(li);
   });
   rootEl.appendChild(frag);

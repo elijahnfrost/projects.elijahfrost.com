@@ -438,7 +438,7 @@ html[data-cursor-custom] body * {
 @keyframes projectStackIn {
   from {
     opacity: 0;
-    transform: translateY(0.75rem);
+    transform: translateY(1rem);
   }
   to {
     opacity: 1;
@@ -450,13 +450,17 @@ html[data-cursor-custom] body * {
   padding: 1.75rem 0;
 }
 
-.tree > li.project-enter {
-  animation: projectStackIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--project-stagger, 0) * 42ms);
+.tree .project-inner {
+  transform-origin: 50% 0;
+}
+
+.tree .project-inner-enter {
+  animation: projectStackIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--project-stagger, 0) * 58ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tree > li.project-enter {
+  .tree .project-inner-enter {
     animation: none;
     opacity: 1;
     transform: none;
