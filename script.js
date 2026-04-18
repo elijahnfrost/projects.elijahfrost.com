@@ -12,7 +12,7 @@ function setRefreshLoading(loading) {
   refreshBtn.setAttribute("aria-busy", loading ? "true" : "false");
 }
 
-function readCache() {
+function readCacheEntry() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -21,12 +21,16 @@ function readCache() {
       typeof parsed !== "object" ||
       parsed === null ||
       typeof parsed.ts !== "number" ||
-      parsed.data === undefined
+      parsed.data === undefined ||
+      !Array.isArray(parsed.data)
     ) {
       return null;
     }
-    if (Date.now() - parsed.ts > TTL_MS) return null;
-    return { data: parsed.data, ts: parsed.ts };
+    return {
+      data: parsed.data,
+      ts: parsed.ts,
+      stale: Date.now() - parsed.ts > TTL_MS,
+    };
   } catch {
     return null;
   }
@@ -58,11 +62,16 @@ function projectHeading(p) {
   return toTitle(p.name);
 }
 
-function render(projects) {
+function render(projects, options = {}) {
+  const animate = options.animate !== false;
   rootEl.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const p of projects) {
+  projects.forEach((p, index) => {
     const li = document.createElement("li");
+    li.className = animate ? "project-row project-enter" : "project-row";
+    if (animate) {
+      li.style.setProperty("--project-stagger", String(index));
+    }
     const line = document.createElement("span");
     line.className = "project-line";
     const a = document.createElement("a");
@@ -108,7 +117,7 @@ function render(projects) {
       li.appendChild(det);
     }
     frag.appendChild(li);
-  }
+  });
   rootEl.appendChild(frag);
 }
 
@@ -119,20 +128,22 @@ function setUpdatedLine(iso) {
 }
 
 async function fetchProjects(bypassCache) {
-  if (!bypassCache) {
-    const cached = readCache();
-    if (cached) {
-      render(cached.data);
-      if (statusEl) statusEl.textContent = "";
-      setUpdatedLine(new Date(cached.ts).toISOString());
-      return;
-    }
-  } else {
+  if (bypassCache) {
     clearCache();
   }
 
+  const entry = bypassCache ? null : readCacheEntry();
+
+  if (entry) {
+    render(entry.data, { animate: true });
+    setUpdatedLine(new Date(entry.ts).toISOString());
+    if (statusEl) statusEl.textContent = entry.stale ? "Updating…" : "";
+    if (!entry.stale) return;
+  } else if (statusEl) {
+    statusEl.textContent = "Loading…";
+  }
+
   setRefreshLoading(true);
-  if (statusEl) statusEl.textContent = "Loading…";
 
   try {
     const res = await fetch("/api/projects", {
@@ -141,8 +152,11 @@ async function fetchProjects(bypassCache) {
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      if (statusEl)
-        statusEl.textContent = `Error ${res.status}${errText ? `: ${errText}` : ""}`;
+      if (statusEl) {
+        statusEl.textContent = entry
+          ? `Could not refresh (${res.status})${errText ? `: ${errText}` : ""}. Showing cached list.`
+          : `Error ${res.status}${errText ? `: ${errText}` : ""}`;
+      }
       return;
     }
     const data = await res.json();
@@ -151,7 +165,7 @@ async function fetchProjects(bypassCache) {
       return;
     }
     writeCache(data);
-    render(data);
+    render(data, { animate: true });
     if (statusEl) statusEl.textContent = "";
     setUpdatedLine(new Date().toISOString());
   } finally {

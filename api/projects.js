@@ -123,18 +123,33 @@ async function fetchAllDnsRecords(zoneId, requestHeaders) {
   return all;
 }
 
+const ZONE_APEX = "elijahfrost.com";
+
+/**
+ * Cloudflare may return the short name (e.g. "projects") or the FQDN
+ * ("projects.elijahfrost.com"). Normalize so we never drop valid zone records.
+ */
+function recordNameToFqdn(rawName) {
+  let name = (rawName || "").toLowerCase().replace(/\.$/, "");
+  if (!name) return null;
+  if (name === ZONE_APEX) return ZONE_APEX;
+  const suffix = `.${ZONE_APEX}`;
+  if (name.endsWith(suffix)) return name;
+  return `${name}.${ZONE_APEX}`;
+}
+
 function extractHostnamesFromRecords(records) {
   const hosts = new Set();
-  const zoneSuffix = ".elijahfrost.com";
+  const zoneSuffix = `.${ZONE_APEX}`;
   for (const r of records) {
     if (r.type !== "A" && r.type !== "CNAME") continue;
-    let name = (r.name || "").toLowerCase().replace(/\.$/, "");
-    if (!name.endsWith(zoneSuffix)) continue;
-    if (name === "elijahfrost.com") continue;
-    if (EXCLUDED_HOSTS.has(name)) continue;
-    const prefix = name.slice(0, -zoneSuffix.length);
+    const fqdn = recordNameToFqdn(r.name);
+    if (!fqdn || !fqdn.endsWith(zoneSuffix)) continue;
+    if (fqdn === ZONE_APEX) continue;
+    if (EXCLUDED_HOSTS.has(fqdn)) continue;
+    const prefix = fqdn.slice(0, -zoneSuffix.length);
     if (!prefix) continue;
-    hosts.add(name);
+    hosts.add(fqdn);
   }
   return [...hosts];
 }

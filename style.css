@@ -435,8 +435,32 @@ html[data-cursor-custom] body * {
   padding: 0;
 }
 
+@keyframes projectStackIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .tree > li {
   padding: 1.75rem 0;
+}
+
+.tree > li.project-enter {
+  animation: projectStackIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--project-stagger, 0) * 42ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree > li.project-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .tree > li + li {
