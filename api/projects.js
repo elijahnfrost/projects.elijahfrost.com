@@ -13,7 +13,6 @@ const PRIORITY_HOSTS = ["elijahfrost.com", "projects.elijahfrost.com"];
 
 const DISPLAY_LABEL = {
   elijahfrost: "Elijah Frost",
-  projects: "Directory",
 };
 const STATIC_EXT =
   /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|map|json)$/i;

@@ -17,59 +17,21 @@
   <body>
     <main class="site-main">
       <div class="shell">
-        <div class="shell-inner">
-          <div class="site-stack">
-            <section class="hero" aria-labelledby="page-title">
+        <div class="shell-inner page-stack">
+          <header class="page-header site-heading" aria-labelledby="page-title">
+            <div class="page-header-stack">
               <h1 id="page-title" class="page-title">Projects</h1>
-              <div class="hero-actions">
-                <div class="hero-action-slot">
-                  <button type="button" id="refresh" class="btn-hero" aria-busy="false">
-                    <span class="btn-hero-inner">
-                      <span class="btn-hero-icon-wrap" aria-hidden="true">
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.7"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="btn-hero-svg btn-hero-svg-primary"
-                        >
-                          <path d="M15.4 7.1A5.8 5.8 0 0 0 5 9.9" />
-                          <path d="M14.8 4.9v3.2h-3.2" />
-                          <path d="M4.6 12.9A5.8 5.8 0 0 0 15 10.1" />
-                          <path d="M5.2 15.1v-3.2h3.2" />
-                        </svg>
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          class="btn-hero-svg btn-hero-svg-busy"
-                          aria-hidden="true"
-                        >
-                          <path d="M10 3.5a6.5 6.5 0 1 1-4.6 1.9" />
-                        </svg>
-                      </span>
-                      <span class="btn-hero-label">Refresh</span>
-                    </span>
-                  </button>
-                </div>
+              <div class="rail-meta">
+                <p class="meta-label">Last updated</p>
+                <p id="updated" class="meta-time" aria-live="polite"></p>
               </div>
-            </section>
-
-            <div id="status" class="status" aria-live="polite"></div>
-
-            <div class="tree-shell">
-              <ul id="root" class="tree"></ul>
+              <div id="status" class="status status--header" aria-live="polite"></div>
             </div>
-          </div>
+          </header>
 
-          <footer class="meta">
-            <p class="meta-label">Last updated</p>
-            <p id="updated" class="meta-time" aria-live="polite"></p>
-          </footer>
+          <div class="tree-shell">
+            <ul id="root" class="tree"></ul>
+          </div>
         </div>
       </div>
     </main>

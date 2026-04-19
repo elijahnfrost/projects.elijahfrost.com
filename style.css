@@ -34,6 +34,12 @@
 
   --text-primary: var(--color-fg);
   --text-body-muted: var(--color-fg-soft);
+
+  /* Shell chrome — same motion language as project rows, toned down */
+  --chrome-rise-duration: 0.38s;
+  --chrome-rise-shift: 0.38rem;
+  /* Narrower than shell — list column width (horizontal), not row spacing */
+  --list-max-width: 38rem;
 }
 
 html {
@@ -95,6 +101,13 @@ html[data-cursor-custom] body * {
   .cursor-root {
     display: none !important;
   }
+
+  .site-heading {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
 }
 
 @media (pointer: coarse) {
@@ -124,7 +137,7 @@ html[data-cursor-custom] body * {
   width: 100%;
   max-width: 72rem;
   margin: 0 auto;
-  padding: clamp(2.5rem, 10vh, 6rem) 1.5rem 1.5rem;
+  padding: clamp(4.5rem, 17vh, 9.5rem) 1.5rem 1.5rem;
   box-sizing: border-box;
   flex: 1;
   display: flex;
@@ -148,7 +161,7 @@ html[data-cursor-custom] body * {
 
 .shell-inner {
   width: 100%;
-  max-width: 56rem;
+  max-width: 72rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -158,21 +171,79 @@ html[data-cursor-custom] body * {
   gap: 0;
 }
 
-/* Main column: vertically centered in the space above the footer */
-.site-stack {
+/* Single column: centered header, then project list */
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: clamp(2.5rem, 6vh, 4rem);
+  width: 100%;
   flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* One block: title + meta — subtle rise, matches project rows */
+.site-heading {
+  width: 100%;
+  max-width: 42rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  animation: chromeRise var(--chrome-rise-duration) cubic-bezier(0.33, 1, 0.68, 1) both;
+  will-change: transform, opacity;
+}
+
+.page-header.site-heading {
+  max-width: none;
   width: 100%;
-  min-height: 0;
-  gap: 0;
+}
+
+.page-header-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.25rem;
+}
+
+.rail-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  width: auto;
+  max-width: 100%;
+  text-align: center;
+}
+
+.page-header-stack .rail-meta {
+  margin-top: 1.375rem;
+}
+
+.rail-meta:has(#updated:empty) {
+  display: none;
+}
+
+@keyframes chromeRise {
+  0% {
+    opacity: 0;
+    transform: translateY(var(--chrome-rise-shift));
+  }
+  1% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero {
   width: 100%;
   max-width: 42rem;
+  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -190,6 +261,8 @@ html[data-cursor-custom] body * {
 .page-title {
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  text-align: center;
   font-size: clamp(3rem, 10vw, 3.75rem);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -229,165 +302,48 @@ html[data-cursor-custom] body * {
   gap: 0.25rem;
 }
 
-/*
-  Ghost outline — same as production hero buttons (no rounded-full; preflight border-radius: 0):
-  inline-flex h-10 min-h-[44px] … border border-[var(--color-border)] bg-transparent px-5 …
-*/
-.btn-hero {
-  display: inline-flex;
-  height: 2.5rem;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0 1.25rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-  background: transparent;
-  font-family: var(--font-inter);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-fg-soft);
-  line-height: 1;
-  transition: all 120ms ease;
-}
-
-.btn-hero:hover:not(:disabled),
-.btn-hero:focus-visible:not(:disabled) {
-  border-color: var(--color-border-hover);
-  color: var(--color-fg);
-}
-
-.btn-hero:disabled {
-  cursor: wait;
-  opacity: 0.5;
-}
-
-.btn-hero:focus-visible {
-  outline: 1px solid var(--color-fg-muted);
-  outline-offset: 2px;
-}
-
-.btn-hero-inner {
-  display: inline-grid;
-  grid-template-columns: 1rem auto;
-  align-items: center;
-  gap: 0.5rem;
-  line-height: 1;
-}
-
-.btn-hero-icon-wrap {
-  position: relative;
-  display: inline-flex;
-  height: 1rem;
-  width: 1rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  transform: translateY(1px);
-  color: var(--stone-300);
-  transition: color 120ms ease;
-}
-
-.btn-hero-svg {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1rem;
-  height: 1rem;
-  display: block;
-  transition: all 150ms ease-out;
-}
-
-.btn-hero:hover:not(:disabled) .btn-hero-icon-wrap,
-.btn-hero:focus-visible:not(:disabled) .btn-hero-icon-wrap {
-  color: var(--color-fg);
-}
-
-.btn-hero-svg-primary {
-  transform: scale(1);
-  opacity: 1;
-}
-
-.btn-hero-svg-busy {
-  transform: scale(0.75);
-  opacity: 0;
-}
-
-.btn-hero[aria-busy="true"] .btn-hero-svg-primary {
-  transform: scale(0.75);
-  opacity: 0;
-}
-
-@keyframes btn-hero-spin {
-  from {
-    transform: rotate(0deg) scale(1);
-  }
-  to {
-    transform: rotate(360deg) scale(1);
-  }
-}
-
-.btn-hero[aria-busy="true"] .btn-hero-svg-busy {
-  transform-origin: center;
-  opacity: 1;
-  animation: btn-hero-spin 1s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn-hero[aria-busy="true"] .btn-hero-svg-busy {
-    animation: none;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.btn-hero-label {
-  display: block;
-  transform: translateY(-1px);
-  line-height: 1;
-}
-
-@media (min-width: 640px) {
-  .btn-hero {
-    height: 2.75rem;
-    padding: 0 1.75rem;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-  }
-}
-
 /* --- Status --- */
 .status {
   width: 100%;
-  max-width: 42rem;
+  max-width: none;
   min-height: 1.5rem;
-  margin-top: 2.25rem;
+  margin-top: 0;
   margin-bottom: 0;
   font-family: var(--font-inter);
   font-size: 0.875rem;
   line-height: 1.625;
   color: var(--color-fg-muted);
-  text-align: center;
+  text-align: left;
 }
 
 .status:empty {
   display: none;
   min-height: 0;
-  margin-top: 0;
 }
 
 .status:not(:empty) {
-  margin-bottom: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.status--header {
+  text-align: center;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.status--header:not(:empty) {
+  margin-top: 1rem;
 }
 
 /* --- Tree: EntryBlock py-7 rhythm, EntryTitle-style links --- */
 .tree-shell {
   width: 100%;
-  max-width: 42rem;
-  margin-top: 1.75rem;
+  max-width: var(--list-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  padding-top: 0;
   text-align: left;
 }
 
@@ -398,81 +354,287 @@ html[data-cursor-custom] body * {
 }
 
 /**
- * Project list only — one block at a time, in list order (API sort: priority, then name).
- * Each row gets --project-stagger = 0,1,2,…; delay between starts ≈ chain gap so projects
- * read as Elijah Frost → Directory → … instead of all moving together.
+ * Project list — list order; each row sets --project-stagger = 0,1,2,…
+ * Slow upward “block” motion; stagger gap stays a fraction of duration so rows still
+ * overlap (next starts before the prior finishes).
  */
 :root {
-  --project-drop-duration: 0.52s;
-  /* Start next block after the previous drop mostly finishes (sequential, not simultaneous). */
-  --project-chain-gap: 0.5s;
+  --project-rise-duration: 0.44s;
+  /* Delay between each row’s animation *start*; ~30% of duration → strong overlap. */
+  --project-stagger-gap: 0.13s;
+  /* Idle previews: faded vs text; hover/focus go to opacity 1 */
+  --project-preview-idle-opacity: 0.3;
 }
 
-@keyframes projectBlockStack {
+@keyframes projectRowRise {
   0% {
     opacity: 0;
-    transform: translateY(-1.35rem) scale(0.97);
+    transform: translateY(1.05rem);
   }
-  52% {
+  /* Near-instant fade; remaining time is upward motion only (no bounce). */
+  1% {
     opacity: 1;
-    transform: translateY(0.22rem) scale(1);
-  }
-  68% {
-    transform: translateY(-0.2rem) scale(1);
-  }
-  84% {
-    transform: translateY(0.08rem) scale(1);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
+  }
+}
+
+/* Motion only on wrapper — iframe opacity lives on .project-preview-frame */
+@keyframes projectPreviewRise {
+  0% {
+    transform: translateY(1.05rem);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Keep 100% opacity in sync with --project-preview-idle-opacity */
+@keyframes projectPreviewFrameEnter {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.3;
   }
 }
 
 .tree > li {
-  padding: 1.75rem 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tree .project-inner {
-  transform-origin: 50% 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: start;
+  margin: 0;
+  padding: 1.25rem 0;
   backface-visibility: hidden;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  /* No full-row fill — that painted a dark slab in the 1fr gap between title and preview */
+  background-color: transparent;
 }
 
-.tree .project-inner-enter {
-  animation: projectBlockStack var(--project-drop-duration) linear both;
-  animation-delay: calc(var(--project-stagger, 0) * var(--project-chain-gap));
+/* Divider between rows — same stagger as .project-body-enter (not on first row). */
+.tree .project-row + .project-row .project-inner::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--color-border-section);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.tree .project-inner--enter::before {
+  animation: projectRowRise var(--project-rise-duration) cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: calc(var(--project-stagger, 0) * var(--project-stagger-gap));
+  will-change: transform, opacity;
+}
+
+/* Full-row target: one link covers the row; routes stay interactive above it */
+.project-row-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  text-decoration: none;
+  border-radius: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.project-row-hit:hover,
+.project-row-hit:focus,
+.project-row-hit:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.tree .project-body {
+  min-width: 0;
+  pointer-events: none;
+  /* Shrink to content so the grid gap stays page-colored (no slab between title and preview) */
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.project-row:has(.project-row-hit:hover) .project-inner,
+.tree .project-inner:has(.project-row-hit:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+@media (min-width: 640px) {
+  .tree .project-inner {
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 13.75rem);
+  }
+}
+
+.tree .project-preview {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  max-width: 13.75rem;
+  justify-self: end;
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .tree .project-preview {
+    max-width: none;
+    justify-self: stretch;
+    order: 2;
+  }
+
+  .tree .project-body {
+    order: 1;
+    justify-self: stretch;
+    width: 100%;
+  }
+}
+
+/*
+  1280×720 layout inside the iframe; visual size uses --preview-scale from JS
+  (ResizeObserver). cqw inside transform on iframes often fails → unscaled clip.
+*/
+.project-preview-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--stone-900);
+  --preview-scale: 0.171875;
+  /* Dim iframe + border together (opacity on wrapper — avoids WebKit iframe quirks) */
+  opacity: var(--project-preview-idle-opacity);
+  transition: opacity 200ms ease;
+}
+
+/* Row hover — not `animation-fill-mode: forwards` on the frame, or opacity stays locked */
+.project-row:hover .project-preview-frame,
+.tree .project-inner:has(.project-row-hit:focus-visible) .project-preview-frame {
+  opacity: 1;
+}
+
+.project-preview-iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 1280px;
+  height: 720px;
+  max-width: none;
+  border: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+  transform: scale(var(--preview-scale));
+}
+
+/* Hide cross-origin loading spinners/skeletons until `load` (script adds --revealed) */
+.project-preview-frame:not(.project-preview-frame--revealed) .project-preview-iframe {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.project-preview-frame--revealed .project-preview-iframe {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.22s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tree .project-inner-enter {
+  .project-preview-frame--revealed .project-preview-iframe {
+    transition: none;
+  }
+}
+
+/*
+ * Row motion: same stagger. Previews use opacity for idle dim + entrance; body stays full opacity.
+ * Do not put transform on .project-inner — it is the iframe’s grid ancestor; motion lives on .project-body / .project-preview.
+ */
+.tree .project-body-enter {
+  animation: projectRowRise var(--project-rise-duration) cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: calc(var(--project-stagger, 0) * var(--project-stagger-gap));
+  will-change: transform, opacity;
+}
+
+.tree .project-preview-enter {
+  animation: projectPreviewRise var(--project-rise-duration) cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: calc(var(--project-stagger, 0) * var(--project-stagger-gap));
+  will-change: transform;
+}
+
+/* `backwards` only — if we use `forwards`/`both`, the last keyframe keeps opacity and blocks :hover */
+.tree .project-preview-enter .project-preview-frame {
+  animation-name: projectPreviewFrameEnter;
+  animation-duration: var(--project-rise-duration);
+  animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  animation-delay: calc(var(--project-stagger, 0) * var(--project-stagger-gap));
+  animation-iteration-count: 1;
+  animation-fill-mode: backwards;
+  will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree .project-body-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .tree .project-preview-enter {
+    animation: none;
+    transform: none;
+  }
+
+  .tree .project-preview-enter .project-preview-frame {
+    animation: none;
+    opacity: var(--project-preview-idle-opacity);
+  }
+
+  .tree .project-inner--enter::before {
     animation: none;
     opacity: 1;
     transform: none;
   }
 }
 
-.tree > li + li {
-  border-top: 1px solid var(--color-border-section);
-}
-
 .tree .route-list {
   list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0 0 0 0.75rem;
+  margin: 0.28rem 0 0;
+  padding: 0 0 0 0.6rem;
   border-left: 1px solid var(--stone-600);
   opacity: 0.9;
 }
 
 .tree .route-list li {
-  padding: 0.35rem 0;
+  padding: 0.175rem 0;
   border-top: none;
 }
 
 /* Collapsible sitemap paths (subdomain + /example, etc.) */
 .project-routes {
-  margin: 0.75rem 0 0;
+  position: relative;
+  z-index: 2;
+  margin: 0.28rem 0 0;
   width: 100%;
   max-width: 100%;
+  pointer-events: auto;
 }
 
 .project-routes summary {
@@ -484,7 +646,7 @@ html[data-cursor-custom] body * {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-fg-soft);
-  padding: 0.25rem 0;
+  padding: 0.2rem 0;
   transition: color 120ms ease;
 }
 
@@ -520,7 +682,28 @@ html[data-cursor-custom] body * {
 }
 
 .project-line {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.22rem;
+}
+
+.project-link-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.36rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.project-link-favicon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
+  opacity: 0.88;
 }
 
 .project-heading {
@@ -533,8 +716,7 @@ html[data-cursor-custom] body * {
   font-size: 1.25rem;
   line-height: 1.25;
   font-weight: 600;
-  color: var(--stone-200);
-  text-decoration: none;
+  color: var(--stone-500);
   transition: color 140ms ease;
 }
 
@@ -544,25 +726,27 @@ html[data-cursor-custom] body * {
   }
 }
 
-/* Hover brightens (same intent as .btn-hero), never dims */
-.project-title:hover,
-.project-title:focus-visible {
-  color: var(--color-fg-bright);
-  text-decoration: none;
+.project-row:has(.project-row-hit:hover) .project-title,
+.project-row:has(.project-row-hit:focus-visible) .project-title {
+  color: var(--stone-300);
 }
 
-.project-title:hover .project-url,
-.project-title:focus-visible .project-url {
-  color: var(--stone-200);
+.project-row:has(.project-row-hit:hover) .project-url-display,
+.project-row:has(.project-row-hit:focus-visible) .project-url-display {
+  color: var(--stone-400);
 }
 
 .project-url {
-  display: inline;
-  margin-left: 0.5rem;
   font-weight: 400;
   font-size: 0.875rem;
   color: var(--stone-500);
   transition: color 140ms ease;
+}
+
+.project-url-display {
+  flex: 1 1 10rem;
+  min-width: 0;
+  word-break: break-word;
 }
 
 /* TopNav link — text-xs tracking-[0.12em] uppercase */
@@ -595,26 +779,6 @@ html[data-cursor-custom] body * {
 .tree .route-list .route-link:hover,
 .tree .route-list .route-link:focus-visible {
   color: var(--stone-200);
-}
-
-/* --- Footer meta: TopNav "In This Page" label pattern --- */
-.meta:has(#updated:empty) {
-  display: none;
-}
-
-.meta {
-  align-self: center;
-  width: 100%;
-  max-width: 42rem;
-  margin-top: auto;
-  flex-shrink: 0;
-  padding-top: 2rem;
-  margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.375rem;
-  text-align: center;
 }
 
 /* text-[10px] tracking-[0.18em] text-stone-500 uppercase */
