@@ -25,6 +25,23 @@ const updatedEl = document.getElementById("updated");
 /** Avoid overlapping fetches from interval + visibility + online handlers. */
 let fetchInFlight = false;
 
+/**
+ * Loading overlay is shown by index.html and removed once the directory has
+ * something to display (cached list, fresh data, or an error message). The
+ * safety timeout keeps the screen from getting stuck if a request hangs.
+ */
+const LOADER_SAFETY_MS = 12000;
+let loaderHidden = false;
+
+function hidePageLoader() {
+  if (loaderHidden) return;
+  loaderHidden = true;
+  document.documentElement.setAttribute("data-loaded", "");
+  document.dispatchEvent(new CustomEvent("page:loaded"));
+}
+
+setTimeout(hidePageLoader, LOADER_SAFETY_MS);
+
 function readCacheEntry() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -390,6 +407,7 @@ async function fetchProjects() {
     render(entry.data, { animate: true });
     setUpdatedLine(new Date(entry.ts).toISOString());
     if (statusEl) statusEl.textContent = entry.stale ? "Updating…" : "";
+    hidePageLoader();
     if (!entry.stale) return;
   } else if (statusEl) {
     statusEl.textContent = "Loading…";
@@ -422,6 +440,7 @@ async function fetchProjects() {
     setUpdatedLine(new Date().toISOString());
   } finally {
     fetchInFlight = false;
+    hidePageLoader();
   }
 }
 
