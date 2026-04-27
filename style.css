@@ -47,6 +47,104 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+  Loading screen — visible until JS has the first render of the project list.
+  Keyed off `<html data-loaded>` (set by script.js once data is on screen) so the
+  overlay paints instantly on first byte without waiting for /script.js to parse.
+*/
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: var(--color-bg-page);
+  color: var(--color-fg);
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 320ms ease, visibility 0s linear 0s;
+}
+
+html[data-loaded] .page-loader {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 320ms ease, visibility 0s linear 320ms;
+}
+
+.page-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+  max-width: 24rem;
+  width: 100%;
+}
+
+.page-loader-title {
+  margin: 0;
+  font-family: "Playfair Display", "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-size: clamp(2.25rem, 7vw, 2.75rem);
+  color: var(--text-primary);
+}
+
+.page-loader-meta {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+}
+
+.page-loader-track {
+  position: relative;
+  width: min(14rem, 70vw);
+  height: 1px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.page-loader-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  background: var(--stone-300);
+  animation: pageLoaderSweep 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes pageLoaderSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader-bar {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+
+  .page-loader,
+  html[data-loaded] .page-loader {
+    transition: opacity 0s, visibility 0s;
+  }
+}
+
 body {
   margin: 0;
   min-height: 100vh;

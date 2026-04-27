@@ -3,7 +3,7 @@
  * (_next/static/chunks/0h-opkp2ru_r0.js): same smoothing (0.45), scale L(),
  * centroid transform-origin, pointer/interactive detection, and visibility rules.
  */
-(function initCustomCursor() {
+(function bootstrapCustomCursor() {
   const prefersReduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -13,6 +13,17 @@
 
   if (prefersReduced || coarsePointer) return;
 
+  /* Hold the tracer behind the loading screen so the custom cursor only takes
+     over the page once the real directory is rendered. script.js sets
+     `data-loaded` on <html> and fires `page:loaded` when that happens. */
+  if (document.documentElement.hasAttribute("data-loaded")) {
+    initCustomCursor();
+    return;
+  }
+  document.addEventListener("page:loaded", initCustomCursor, { once: true });
+})();
+
+function initCustomCursor() {
   const p65 = (65 * Math.PI) / 180;
   function g(n) {
     return Math.round(n * 1e3) / 1e3;
@@ -272,4 +283,4 @@
     },
     { once: true }
   );
-})();
+}
